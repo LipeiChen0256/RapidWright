@@ -1,4 +1,4 @@
-# Folder<minitask2>
+# Folder minitask2
 the project files are stored here.
-# Folder<RapidWright>
+# Folder RapidWright
 RapidWright tools
