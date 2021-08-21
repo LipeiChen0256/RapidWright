@@ -1,0 +1,11 @@
+*.class
+/data/
+/jars/
+/build/
+/.gradle/
+.pydevproject
+/.settings/
+/bin/
+.idea
+*.iml
+/designs/
