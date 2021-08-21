@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-#Folder<minitask2>
-the project file
-#Folder<RapidWright>
-RapidWright tools
-=======
 # RapidWright  
 
 Try RapidWright in your browser: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/clavin-xlnx/RapidWright-binder/master?filepath=HelloWorld.ipynb)
