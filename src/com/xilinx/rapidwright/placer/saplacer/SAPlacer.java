@@ -39,7 +39,7 @@ public class SAPlacer {
     }
 
     /**
-     *
+     * get tiles from the design
      */
     public static void getTileSize(){
         HashSet<Tile> tileSet=new HashSet<Tile>();
@@ -61,6 +61,13 @@ public class SAPlacer {
     private static double probability(double Snew, double S, double Temperature){
         if(Snew>S) return 1;
         else return Math.exp((S-Snew)/Temperature);
+    }
+
+    /**
+     * SA algorithm
+     */
+    private static void SA_algorithm(){
+
     }
 
     /**

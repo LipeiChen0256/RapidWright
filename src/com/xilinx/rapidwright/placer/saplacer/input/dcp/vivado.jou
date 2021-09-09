@@ -1,0 +1,13 @@
+#-----------------------------------------------------------
+# Vivado v2021.1 (64-bit)
+# SW Build 3247384 on Thu Jun 10 19:36:33 MDT 2021
+# IP Build 3246043 on Fri Jun 11 00:30:35 MDT 2021
+# Start of session at: Sun Sep  5 07:48:53 2021
+# Process ID: 29152
+# Current directory: D:/TUD/Low Level/task2/dcp
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent5596 D:\TUD\Low Level\task2\dcp\1_spi.dcp
+# Log file: D:/TUD/Low Level/task2/dcp/vivado.log
+# Journal file: D:/TUD/Low Level/task2/dcp\vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_checkpoint {D:/TUD/Low Level/task2/dcp/1_spi.dcp}
