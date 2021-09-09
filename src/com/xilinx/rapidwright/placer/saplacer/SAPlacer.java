@@ -1,6 +1,7 @@
 package com.xilinx.rapidwright.placer.saplacer;
 
 
+import com.xilinx.rapidwright.design.Cell;
 import com.xilinx.rapidwright.design.Design;
 import com.xilinx.rapidwright.design.Net;
 import com.xilinx.rapidwright.design.SiteInst;
@@ -9,10 +10,7 @@ import com.xilinx.rapidwright.device.PIP;
 import com.xilinx.rapidwright.device.Site;
 import com.xilinx.rapidwright.device.Tile;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class SAPlacer {
     private static Design design;
@@ -62,10 +60,8 @@ public class SAPlacer {
     /**
      * to get sites from tiles
      */
-    public static void getSites(HashSet<Tile> tiles){
-        for(Tile t:tiles)
-            sites= Arrays.asList(t.getSites());
-        int t=1;//test
+    public List<Site> getSites() {
+        return sites;
     }
     /**
      * compute the probabilities
@@ -84,14 +80,34 @@ public class SAPlacer {
         alpha=0.44;
         gamma=1.0;
         Temperature=1e3;
-        HashSet<Tile> tiles = new HashSet<Tile>();
-        getTileSize(tiles);
-        getSites(tiles);
+        if(sites.isEmpty()) System.out.println("Error: no sites to be placed on");
+        Path current = new Path(sites);
+        Path best = current.duplicate();
         //-----------------------get Sites and do initialization
 
+        for (double t=Temperature; t > 1; t *= gamma){
+            Path neighbour = current.duplicate();
+
+            int index1=(int)(neighbour.SitesNum()*Math.random());
+            int index2 = (int)(neighbour.SitesNum()*Math.random());
+            Collections.swap(sites, index1, index2);
+
+            int currentlength =current.computeDistance();
+            int neighbourlength =neighbour.computeDistance();
+
+            if(Math.random() < probability(currentlength, neighbourlength, t))
+                current=neighbour.duplicate();
+
+            if(current.computeDistance()<best.computeDistance())
+                best=current.duplicate();
+        }
+
+        System.out.println("Final Path length : "+best.computeDistance());
+        System.out.println("Path : "+ best);
 
 
     }
+
 
     /**
      * write the .dcp file
@@ -102,6 +118,13 @@ public class SAPlacer {
     public static void main(String[] arg){
         InitPlacer();   //Initialization, read from file
         //getTileSize();  //
+        Collection<Cell> cells = design.getCells();
+        Collection<SiteInst> SiteInsts = design.getSiteInsts();
+        Collection<Tile> tiles = device.getAllTiles();
+        HashSet<Site> unusedSites = new HashSet<>();
+
+
+
         SA_algorithm();
         WriteDCP();     //write the output
     }

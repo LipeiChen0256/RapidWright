@@ -1,3 +1,5 @@
+package src;
+
 import com.xilinx.rapidwright.design.*;
 import com.xilinx.rapidwright.design.Module;
 import com.xilinx.rapidwright.device.Device;
@@ -20,7 +22,7 @@ public class MyPlacement {
     private static double temperature = 1000;
     private static double coolingFactor = 0.995;
 
-    List<Site> sites = new ArrayList<>();
+    List<Site> sites = new ArrayList<Site>();
 
     private static double Probability(double f1, double f2, double temp) {
         if (f2 < f1) return 1;
