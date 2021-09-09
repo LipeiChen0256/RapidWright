@@ -16,10 +16,6 @@ public class Trace {
         return sites.get(index);
     }
 
-    public List<Site> getSites() {
-        return sites;
-    }
-
     public int getTraceLength() {
         if (distance != 0) return distance;
 
@@ -44,4 +40,7 @@ public class Trace {
     }
 
     // Getters and toString()
+    public List<Site> getSites() {
+        return sites;
+    }
 }
