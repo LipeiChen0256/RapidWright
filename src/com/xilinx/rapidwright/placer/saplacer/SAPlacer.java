@@ -6,23 +6,29 @@ import com.xilinx.rapidwright.design.Net;
 import com.xilinx.rapidwright.design.SiteInst;
 import com.xilinx.rapidwright.device.Device;
 import com.xilinx.rapidwright.device.PIP;
+import com.xilinx.rapidwright.device.Site;
 import com.xilinx.rapidwright.device.Tile;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 public class SAPlacer {
     private static Design design;
     private static String filename;
     private static Device device;
-
+    private static List<Site> sites;
+  //  private static HashSet<Tile> tiles;
     private static int tileSize;
 
+    private static double alpha;
+    private static double gamma;
+    private static double Temperature;
+    private static double StartTemp = 1e3;
 
     public SAPlacer(){
-        double alpha = 0.44;
-        double gamma = 1.0;
-        double initTemperature = 1e3;
+
     }
 
     /**
@@ -41,17 +47,25 @@ public class SAPlacer {
     /**
      * get tiles from the design
      */
-    public static void getTileSize(){
-        HashSet<Tile> tileSet=new HashSet<Tile>();
+    public static void getTileSize(HashSet<Tile> tiles){
+
         for(SiteInst inst: design.getSiteInsts()){
-            tileSet.add(inst.getTile());
+            tiles.add(inst.getTile());
         }
         for(Net net: design.getNets()){
             for(PIP p: net.getPIPs()){
-                tileSet.add(p.getTile());
+                tiles.add(p.getTile());
             }
         }
-        SetTileSize(tileSet.size());
+        SetTileSize(tiles.size());
+    }
+    /**
+     * to get sites from tiles
+     */
+    public static void getSites(HashSet<Tile> tiles){
+        for(Tile t:tiles)
+            sites= Arrays.asList(t.getSites());
+        int t=1;//test
     }
     /**
      * compute the probabilities
@@ -67,6 +81,15 @@ public class SAPlacer {
      * SA algorithm
      */
     private static void SA_algorithm(){
+        alpha=0.44;
+        gamma=1.0;
+        Temperature=1e3;
+        HashSet<Tile> tiles = new HashSet<Tile>();
+        getTileSize(tiles);
+        getSites(tiles);
+        //-----------------------get Sites and do initialization
+
+
 
     }
 
@@ -78,8 +101,8 @@ public class SAPlacer {
     }
     public static void main(String[] arg){
         InitPlacer();   //Initialization, read from file
-        getTileSize();  //
-
+        //getTileSize();  //
+        SA_algorithm();
         WriteDCP();     //write the output
     }
 }
