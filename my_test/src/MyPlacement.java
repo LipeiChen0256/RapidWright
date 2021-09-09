@@ -82,6 +82,13 @@ public class MyPlacement {
                 AllSitesOnDevice.put(s.getName(), s);
             }
         }
+        HashSet<Site> unusedSites = new HashSet<>();
+//        for (Tile t : tiles) {
+//            Site[] tempArr = t.getSites();
+//            for (Site s : tempArr){
+//                if() unusedSites.add(s);
+//            }
+//        }
 
         EDIFNetlist netlist = design.getNetlist();
         EDIFCell topCell = netlist.getTopCell();
