@@ -42,4 +42,7 @@ public class Trace {
     }
 
     // Getters and toString()
+    public List<Site> getSites() {
+        return sites;
+    }
 }
