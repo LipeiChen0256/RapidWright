@@ -1,0 +1,227 @@
+[33mcommit 3bf2efe1dbc80e61bcdc7fdef683fa7eda1f4229[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: chaoran lu <luchaorancn@126.com>
+Date:   Wed Sep 8 17:30:29 2021 +0200
+
+    second Commit - realize SA-Algorithm
+
+[33mcommit 02d213ba58d4606ae97e72f46248e99b099f675d[m
+Author: chaoran lu <luchaorancn@126.com>
+Date:   Tue Aug 31 23:25:28 2021 +0200
+
+    try to find unplaced cells
+
+[33mcommit cf98514166439e83aa444fcee495cf916d3114a9[m
+Author: chaoran lu <luchaorancn@126.com>
+Date:   Sun Aug 29 22:45:05 2021 +0200
+
+    first commit
+
+[33mcommit 1c60a685d408b182f9687d77673a86b1e84d344e[m
+Author: chaoran lu <35493203+Chancenloslu@users.noreply.github.com>
+Date:   Sun Aug 22 15:50:35 2021 +0200
+
+    Rename README1.md to README.md
+
+[33mcommit 87d263854146b5033d2bb87ec78068b967055e00[m
+Author: chaoran lu <35493203+Chancenloslu@users.noreply.github.com>
+Date:   Sat Aug 21 22:23:49 2021 +0200
+
+    Update README1.md
+
+[33mcommit f1f2e3bf95680e9b6c6b7dd1019b02786b4e9902[m
+Author: chaoran lu <35493203+Chancenloslu@users.noreply.github.com>
+Date:   Sat Aug 21 22:23:07 2021 +0200
+
+    Update README1.md
+
+[33mcommit 73d75236fe48270a87e6fbc599b92bf30cf6eb9a[m
+Author: chaoran lu <35493203+Chancenloslu@users.noreply.github.com>
+Date:   Sat Aug 21 22:22:14 2021 +0200
+
+    Update README.md
+
+[33mcommit 07cf3a8509b891d2d3a6b84505b243e80a25b7f7[m
+Merge: c707992 43b5a37
+Author: chaoran lu <luchaorancn@126.com>
+Date:   Sat Aug 21 22:18:54 2021 +0200
+
+    first commit
+
+[33mcommit c707992e39f01a6b84dcd01cab10195fbffa062a[m
+Author: chaoran lu <luchaorancn@126.com>
+Date:   Sat Aug 21 22:05:15 2021 +0200
+
+    first commit
+
+[33mcommit 43b5a37480f350fb6e74856b6955b112cfe3ae44[m
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Wed Aug 18 12:25:08 2021 -0600
+
+    Fixes mistaken EDIF binary classification
+    
+    Signed-off-by: Chris Lavin <clavin@xilinx.com>
+
+[33mcommit 17df8a5bac8daae566fa85277765b49aeaa80f43[m
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Fri Aug 13 11:29:42 2021 -0600
+
+    Checks return of ModuleInst.place() as good practice.
+    
+    Signed-off-by: Chris Lavin <clavin@xilinx.com>
+
+[33mcommit 535197259fc81ddf851460f88b46f382ec2297bb[m
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Fri Aug 13 11:29:12 2021 -0600
+
+    Basic method to get PIPs between src and sink pin.
+    
+    Signed-off-by: Chris Lavin <clavin@xilinx.com>
+
+[33mcommit fea8e3b849a0265f69e5fb176284ec248fb8d234[m
+Author: Chris Lavin <chris.lavin@xilinx.com>
+Date:   Mon Aug 9 10:55:06 2021 -0700
+
+    Adding more clarity on Javadoc styling.
+
+[33mcommit edea2d9aa5eaee2100cba976fd30aafca8c5dd0d[m
+Merge: 6dfa2e6 3028dc1
+Author: Chris Lavin <chris.lavin@xilinx.com>
+Date:   Mon Aug 9 09:41:34 2021 -0600
+
+    Merge pull request #222 from jakobwenzel/fixDeprecatedInt
+    
+    no longer use deprecated Integer constructor
+
+[33mcommit 3028dc14950c2d4fc7182431209ea9c39004e09c[m
+Author: Jakob Wenzel <jakobw@xilinx.com>
+Date:   Mon Aug 9 11:38:57 2021 +0200
+
+    no longer use deprecated Integer constructor
+    
+    Signed-off-by: Jakob Wenzel <jakobw@xilinx.com>
+
+[33mcommit 6dfa2e6aed7bc1fc522e6c6075b0ce0c91b46443[m
+Merge: 9f5c10b 6acf936
+Author: Chris Lavin <chris.lavin@xilinx.com>
+Date:   Thu Aug 5 17:54:24 2021 -0600
+
+    Merge pull request #219 from Xilinx/moving_timing_files
+    
+    Moving timing files out of data into repo.
+
+[33mcommit 6acf936bec70f973df24932b31665de8b8cb33f9[m
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Thu Aug 5 17:19:50 2021 -0600
+
+    Moving timing files out of data into repo.
+    
+    Signed-off-by: Chris Lavin <clavin@xilinx.com>
+
+[33mcommit 9f5c10b0c01645fc5c46bd736ab41367ef39837e[m
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Thu Aug 5 16:42:16 2021 -0600
+
+    Moving ltx_templates to static code
+    
+    Signed-off-by: Chris Lavin <clavin@xilinx.com>
+
+[33mcommit 78257ea57e1e62815fea8fec9df53c311a497e9f[m
+Merge: 516d2f7 00b4683
+Author: Chris Lavin <chris.lavin@xilinx.com>
+Date:   Thu Aug 5 15:26:50 2021 -0600
+
+    Merge pull request #218 from Xilinx/fix_for_217
+    
+    Fix for 217
+
+[33mcommit 00b46837246e60d68c913d9b12868d75503600f1[m
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Thu Aug 5 15:23:10 2021 -0600
+
+    Fix for Issue #217, primName and macroName were not being populated for all rules.
+    
+    Signed-off-by: Chris Lavin <clavin@xilinx.com>
+
+[33mcommit e31d86ee8561930a3bc15f32c40336cc9d0be70e[m
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Thu Aug 5 15:22:34 2021 -0600
+
+    Updates to the latest interchange schema
+    
+    Signed-off-by: Chris Lavin <clavin@xilinx.com>
+
+[33mcommit 516d2f77dc4e4f83155b34c32f0c0c3ece35b9c6[m
+Merge: 795b96c d1afdc3
+Author: Chris Lavin <chris.lavin@xilinx.com>
+Date:   Tue Aug 3 09:31:26 2021 -0600
+
+    Merge pull request #215 from jakobwenzel/ghMemUsage
+    
+    Gradle improvements
+
+[33mcommit d1afdc39fa4fbe27d8540390d36968c3f0977972[m
+Author: Jakob Wenzel <jakobw@xilinx.com>
+Date:   Tue Aug 3 12:34:35 2021 +0200
+
+    add jvm arg to ensure compatibility with Java 16
+    
+    Kryo needs acces sto sun.nio.ch.DirectBuffer, which is forbidden by
+    default in Java 16 and up.
+    
+    Signed-off-by: Jakob Wenzel <jakobw@xilinx.com>
+
+[33mcommit 1b67d3ab76856c9dfa93889f661e9bab5f865ab8[m
+Author: Jakob Wenzel <jakobw@xilinx.com>
+Date:   Tue Aug 3 12:33:42 2021 +0200
+
+    increase maximum heap size for junit tests
+    
+    Signed-off-by: Jakob Wenzel <jakobw@xilinx.com>
+
+[33mcommit 795b96c50cd43bd31a95a640d10006f5801a9573[m
+Merge: 4265420 0c29b43
+Author: Chris Lavin <chris.lavin@xilinx.com>
+Date:   Mon Aug 2 10:13:02 2021 -0600
+
+    Merge pull request #213 from Xilinx/macro_param_mappings
+    
+    Builds and adds onto #180.  Discovers data from Vivado and generates …
+
+[33mcommit 0c29b435fbb83892784fb1c185f42306a705d4d0[m
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Fri Jul 30 19:01:58 2021 -0600
+
+    Builds and adds onto #180.  Discovers data from Vivado and generates static code to make available in RapidWright.
+    
+    Signed-off-by: Chris Lavin <clavin@xilinx.com>
+
+[33mcommit 4265420229326df9123e5b876c9a33f979a493ae[m
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Fri Jul 30 18:58:24 2021 -0600
+
+    Adding method to check vivado version.
+    
+    Signed-off-by: Chris Lavin <clavin@xilinx.com>
+
+[33mcommit 90d1949836b6cfeede783c59c758de48577c2f61[m
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Thu Jul 29 17:28:10 2021 -0600
+
+    Adding removePort() method to EDIFCell
+    
+    Signed-off-by: Chris Lavin <clavin@xilinx.com>
+
+[33mcommit 11ad9dd9cec961ccf98b5c5abd49bd7c30733ccc[m
+Merge: 13ec103 b9cd7b6
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Thu Jul 29 17:27:16 2021 -0600
+
+    Merge branch 'master' of http://github.com/Xilinx/RapidWright
+
+[33mcommit 13ec103616c803f22e8498acce211c6de1d2d596[m
+Author: Chris Lavin <clavin@xilinx.com>
+Date:   Thu Jul 29 17:27:12 2021 -0600
+
+    Utility method to resolve physical net naming inconsistency.
+    
+    Signed-off-by: Chris Lavin <clavin@xilinx.com>

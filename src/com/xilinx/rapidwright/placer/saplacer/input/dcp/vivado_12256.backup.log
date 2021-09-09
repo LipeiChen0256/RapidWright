@@ -1,0 +1,47 @@
+#-----------------------------------------------------------
+# Vivado v2021.1 (64-bit)
+# SW Build 3247384 on Thu Jun 10 19:36:33 MDT 2021
+# IP Build 3246043 on Fri Jun 11 00:30:35 MDT 2021
+# Start of session at: Sat Sep  4 21:43:30 2021
+# Process ID: 12256
+# Current directory: D:/TUD/Low Level/task2/dcp
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent22540 D:\TUD\Low Level\task2\dcp\1_spi.dcp
+# Log file: D:/TUD/Low Level/task2/dcp/vivado.log
+# Journal file: D:/TUD/Low Level/task2/dcp\vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_checkpoint {D:/TUD/Low Level/task2/dcp/1_spi.dcp}
+Command: open_checkpoint {D:/TUD/Low Level/task2/dcp/1_spi.dcp}
+
+Starting open_checkpoint Task
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.036 . Memory (MB): peak = 1496.184 ; gain = 0.000
+WARNING: [Vivado 12-8410] Design file 'D:/TUD/Low Level/task2/dcp/1_spi.dcp' has failed integrity check (1).
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/Xilinx/Vivado/2021.1/data/ip'.
+INFO: [Device 21-403] Loading part xc7a200tfbg484-3
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.002 . Memory (MB): peak = 1496.184 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 5 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2018.2.1
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Constraints 18-4397] Generator change detected checking ShapeConfig Enum. shapeDB will be regenerated.
+Parsing XDC File [D:/TUD/Low Level/task2/dcp/1_spi/spi.xdc]
+Finished Parsing XDC File [D:/TUD/Low Level/task2/dcp/1_spi/spi.xdc]
+Reading XDEF placement.
+Reading placer database...
+Reading XDEF routing.
+Read XDEF File: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.025 . Memory (MB): peak = 1496.184 ; gain = 0.000
+Restored from archive | CPU: 0.000000 secs | Memory: 0.000000 MB |
+Finished XDEF File Restore: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.026 . Memory (MB): peak = 1496.184 ; gain = 0.000
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1779.828 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+INFO: [Project 1-604] Checkpoint was created with Vivado v2018.2.1 (64-bit) build 2288692
+open_checkpoint: Time (s): cpu = 00:00:28 ; elapsed = 00:00:13 . Memory (MB): peak = 1986.012 ; gain = 489.828
+exit
+INFO: [Common 17-206] Exexit
+INFO: [Common 17-206] Exiting Vivado at Sat Sep  4 23:03:29 2021...
