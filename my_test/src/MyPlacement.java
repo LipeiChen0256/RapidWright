@@ -46,7 +46,7 @@ public class MyPlacement {
             int index1 = (int) (neighbor.noSites() * Math.random());
             int index2 = (int) (neighbor.noSites() * Math.random());
 
-            Collections.swap(neighbor.getSites(), index1, index2);
+            Collections.swap(this.getSites(), index1, index2);
 
             int currentLength = current.getTraceLength();
             int neighborLength = neighbor.getTraceLength();
@@ -76,14 +76,13 @@ public class MyPlacement {
         Collection<Cell> cells = design.getCells();
         Collection<SiteInst> SiteInsts = design.getSiteInsts();
         Collection<Tile> tiles = device.getAllTiles();
-
-        HashMap<String, Site> AllSitesOnDevice = new HashMap<>();
-        for (Tile t : tiles) {
-            Site[] tempArr = t.getSites();
-            for (Site s : tempArr) {
-                AllSitesOnDevice.put(s.getName(), s);
-            }
-        }
+        HashSet<Site> unusedSites = new HashSet<>();
+//        for (Tile t : tiles) {
+//            Site[] tempArr = t.getSites();
+//            for (Site s : tempArr){
+//                if() unusedSites.add(s);
+//            }
+//        }
 
         EDIFNetlist netlist = design.getNetlist();
         EDIFCell topCell = netlist.getTopCell();
