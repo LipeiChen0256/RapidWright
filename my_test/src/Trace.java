@@ -1,47 +1,69 @@
+import com.xilinx.rapidwright.design.Net;
+import com.xilinx.rapidwright.design.SiteInst;
 import com.xilinx.rapidwright.device.Site;
+import com.xilinx.rapidwright.device.Tile;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.sql.Array;
+import java.util.*;
 
 public class Trace {
-    private List<Site> sites;
+    private ArrayList<SiteInst> siteInsts; //siteInsts to be placed/moved
     private int distance;
 
-    public Trace(List<Site> sites) {
-        this.sites = new ArrayList<>(sites);
-        Collections.shuffle(this.sites);
-    }
-    public Site getSite(int index) {
-        return sites.get(index);
+    public Trace(Collection<SiteInst> siteInsts) {
+        this.siteInsts = new ArrayList<>(siteInsts);
     }
 
-    public int getTraceLength() {
-        if (distance != 0) return distance;
+    //TODO
+//    public int calculatedLength() {
+//        distance = 0;
+//        int tmpLen = 0;
+//        int size = siteInsts.size();
+//        Tile tmp = siteInsts.get(0).getTile();
+//        for (int i = 1; i < size; i++) {
+//            Tile next = siteInsts.get(i).getTile();
+//            //TODO ManhattenDistance or BoundingBox
+//            distance += tmp.getTileManhattanDistance(next);// * (get(i).getPin().getNet().getFanOut())/2;
+//            tmp = next;
+//        }
+//        return distance;
+//    }
 
-        int totalDistance = 0;
+    //TODO
+    public int calculateHPWL(){
+        int hpwl = 0;
+        int corrFactor = 1;
 
-        for (int i = 0; i < noSites(); i++) {
-            Site start = getSite(i);
-            Site end = getSite(i + 1 < noSites() ? i + 1 : 0);
-            totalDistance += start.getTile().getManhattanDistance(end.getTile());
+
+//        ArrayList<SiteInst> siteInsts = new ArrayList<>(n.getSiteInsts());
+        Tile tmp = siteInsts.get(0).getTile();
+        int min_X = tmp.getColumn();
+        int max_X = tmp.getColumn();
+        int min_Y = tmp.getRow();
+        int max_Y = tmp.getRow();
+        int size = siteInsts.size();
+        for (int i = 1; i < size; i++) {
+            Tile next = siteInsts.get(i).getTile();
+            int tmpX = next.getColumn();
+            int tmpY = next.getRow();
+            if (tmpX < min_X) {
+                min_X = tmpX;
+            } else if (tmpX > max_X) {
+                max_X = tmpX;
+            }
+            if (tmpY < min_Y) {
+                min_Y = tmpY;
+            } else if (tmpY > max_Y) {
+                max_Y = tmpY;
+            }
         }
+        hpwl += (Math.abs(min_X - max_X) + Math.abs(min_Y - max_Y)) * corrFactor;
 
-        distance = totalDistance;
-        return totalDistance;
+        distance = hpwl;
+        return hpwl;
     }
 
-    public Trace duplicate() {
-        return new Trace(new ArrayList<>(sites));
-    }
-
-    public int noSites() {
-        return sites.size();
-    }
-
-    // Getters and toString()
-
-    public List<Site> getSites() {
-        return sites;
+    public int getDistance() {
+        return distance;
     }
 }
