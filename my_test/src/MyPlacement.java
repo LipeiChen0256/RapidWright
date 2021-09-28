@@ -28,7 +28,11 @@ public class MyPlacement {
     private int innerNum = 1;
     private double rangeLimit;
     private Random rand = new Random();
+    boolean calInitialTemp = false;
+    HashMap<SiteInst, Site> bestConfiguration;
 
+    SiteInst selectedSiteInst;
+    Site selectedSite;
     public MyPlacement(Design design) {
         this.device = design.getDevice();
         this.design = design;
@@ -46,37 +50,40 @@ public class MyPlacement {
         //number of elements to be configured
         double N = siteInstsToBePlaced.size();
         boolean exit = false;
-        rangeLimit = (int) (Math.sqrt(N) * 1.5);
         temperature = InitalTemperature();
 
+        System.out.println("start annealing ...");
         rangeLimit = Math.max(device.getColumns(), device.getRows());
         designTracker current= new designTracker(design.getSiteInsts(), design.getNets());
-        designTracker best = current.duplicate();
-
+        double prevLength = current.calSysCost();
+        double bestLength = prevLength;
+//        designTracker best = current.duplicate();
+        int movesPerTemp = (int) (innerNum * Math.pow(N, 1.333));
         while(!exit){
             int numAcceptedChange = 0;
             int numChange = 0;
             int numRefusedChange = 0;
             int badAcceptedMoveCount = 0;
             double totalMovesCost = 0.0;
-            int movesPerTemp = (int) (innerNum * Math.pow(N, 1.333));
-            for(int i=0; i<movesPerTemp; i++){
-                designTracker neighbour = current.duplicate();
-                neighbour = applyRandChange(neighbour);
-                numChange++;
-                double currLength = current.calSysCost();
-                double neigLength = neighbour.calSysCost();
-                if (Math.random() < Probability(currLength, neigLength, temperature)) {
-                    numAcceptedChange++;
-                    current = neighbour.duplicate();
-                }else{
-                    numRefusedChange++;
-                }
 
-                if (currLength < best.calSysCost()) {
-                    best = current.duplicate();
+            for(int i=0; i<movesPerTemp; i++){
+
+                if(applyRandChange(current)) {
+                    numChange++;
+                    double currLength = current.calSysCost();
+                    if (Math.random() < Probability(prevLength, currLength, temperature)) {
+                        numAcceptedChange++;
+                        prevLength = currLength;
+                    } else {
+                        numRefusedChange++;
+                        undoChange();
+                    }
+                    if (currLength < bestLength) {
+                        bestLength = currLength;
+                        bestConfiguration = current.generateConfig();
+                    }
                 }
-            }
+            }//inner loop
 
             if(numChange > 0) {
                 alpha = ((double) numAcceptedChange) / numChange;
@@ -90,15 +97,23 @@ public class MyPlacement {
             rangeLimit = Math.max(rangeLimit, 1.0);
 
             temperature = updateTemperature(temperature, alpha);
-
+            System.out.printf("temperature: %f, range limit: %f, best system cost: %f%n", temperature,rangeLimit,bestLength);
             //TODO: the exit condition of the outer loop
-            if(numChange < 1) exit = true;
+            double exitCriterion = 0.05 * (prevLength/current.getNets().size());
+            if(temperature < exitCriterion)
+                exit = true;
         }
+        System.out.println("Annealing completed!");
+//        design.clearUsedSites();
+//        for(Map.Entry<SiteInst, Site> e : bestConfiguration.entrySet()){
+//            e.getKey().place(e.getValue());
+//        }
 
-        siteInstsToBePlaced = best.getSiteInstsPlaced();
-        for(SiteInst si : siteInstsToBePlaced){
-            si.place(si.getSite());
-        }
+        System.out.println("SAPlacer completed.");
+    }
+
+    private void undoChange() {
+        selectedSiteInst.place(selectedSite);
     }
 
     private double updateTemperature(double temperature, double alpha) {
@@ -111,43 +126,60 @@ public class MyPlacement {
     }
 
     private double InitalTemperature() {
+        calInitialTemp = true;
         int numSiteInst = siteInstsToBePlaced.size();
         double stdDev = 0.0;
         double avgCost = 0.0;
         double curCost = 0.0;
         double tmp = 0.0;
+        int numAcceptedChange = 0;
         designTracker current = new designTracker(design.getSiteInsts(), design.getNets());
         ArrayList<Double> arrayCosts = new ArrayList<>();
         for(int i=0; i<numSiteInst; i++){
             //TODO: is the random Change the same as generateNew
-            current= applyRandChange(current);
-            curCost = current.calSysCost();
 
-            arrayCosts.add(curCost);
-            avgCost = avgCost + curCost;
+            if(applyRandChange(current)) {
+                curCost = current.calSysCost();
+                numAcceptedChange++;
+                arrayCosts.add(curCost);
+                avgCost = avgCost + curCost;
+            }
         }
-        avgCost = avgCost / numSiteInst;
+        System.out.println("N random Changes compeleted.");
+        avgCost = avgCost / numAcceptedChange;
         for(double c : arrayCosts){
             tmp = c - avgCost;
             stdDev = stdDev + (tmp*tmp);
         }
-        stdDev = Math.sqrt(stdDev / numSiteInst);
+        stdDev = Math.sqrt(stdDev / (numAcceptedChange-1));//sample standard deviation
+        System.out.println("initial temperature is " + 20*stdDev);
+        calInitialTemp = false;
         return 20 * stdDev;
     }
 
     //TODO
-    private designTracker applyRandChange(designTracker dt) {
+    public boolean applyRandChange(designTracker current) {
 
-        designTracker dt1 = new designTracker(dt.getSiteInstsPlaced(), dt.getNets());
-        int size = dt1.getSiteInstsPlaced().size();
-        SiteInst selectedSiteInst = dt1.getSiteInstsPlaced().get(rand.nextInt(size-1));
-        Site selectedSite = selectedSiteInst.getSite();
-        System.out.println(selectedSite.getName()+" is selected." + selectedSiteInst.getName() + " is moved.");
+        int size = current.getSiteInstsPlaced().size();
+        selectedSiteInst = current.getSiteInstsPlaced().get(rand.nextInt(size));
+        selectedSite = selectedSiteInst.getSite();
+//        System.out.println(selectedSite.getName()+" is selected." + selectedSiteInst.getName() + " is moved.");
         ArrayList<Site> randSiteRange = new ArrayList<>();
-        int min_Y = Math.max(1			     ,selectedSite.getTile().getRow()-(int)rangeLimit);
-        int max_Y = Math.min(device.getRows()    ,selectedSite.getTile().getRow()+(int)rangeLimit);
-        int min_X = Math.max(1			     ,selectedSite.getTile().getColumn()-(int)rangeLimit);
-        int max_X = Math.min(device.getColumns() ,selectedSite.getTile().getColumn()+(int)rangeLimit);
+        int min_X;
+        int min_Y;
+        int max_Y;
+        int max_X;
+        if(calInitialTemp) {
+            min_Y = 1;
+            max_Y = device.getRows();
+            min_X = 1;
+            max_X = device.getColumns();
+        }else{
+            min_Y = Math.max(1, selectedSite.getTile().getRow() - (int) rangeLimit);
+            max_Y = Math.min(device.getRows(), selectedSite.getTile().getRow() + (int) rangeLimit);
+            min_X = Math.max(1, selectedSite.getTile().getColumn() - (int) rangeLimit);
+            max_X = Math.min(device.getColumns(), selectedSite.getTile().getColumn() + (int) rangeLimit);
+        }
         for(Site s : getValidSites(selectedSite.getSiteTypeEnum())){
             if (s.getTile().getColumn()>=min_X && s.getTile().getColumn()<=max_X &&
                     s.getTile().getRow()>=min_Y && s.getTile().getRow()<=max_Y){
@@ -155,12 +187,14 @@ public class MyPlacement {
             }
         }
 
-        Site randSite = randSiteRange.get(rand.nextInt(randSiteRange.size()-1));
-        selectedSiteInst.place(randSite);
-
-//        if(!design.isSiteUsed(selectedSite)) System.out.println(selectedSite.getName()+" is not used now. Moved to "+randSite.getName());
-        return dt1;
-
+        if(randSiteRange.size()>0){
+            Site randSite = randSiteRange.get(rand.nextInt(randSiteRange.size()));
+            selectedSiteInst.place(randSite);
+            //        if(!design.isSiteUsed(selectedSite)) System.out.println(selectedSite.getName()+" is not used now. Moved to "+randSite.getName());
+            return true;
+        }else{
+            return false;
+        }
     }
 
     //TODO
@@ -223,7 +257,7 @@ public class MyPlacement {
     public static void main(String[] args) {
 
 
-        Design design = Design.readCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/spmc/mjpeg_5cores/configuration_placed.dcp");
+        Design design = Design.readCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/spmc/hello_world_vivado/configuration_placed.dcp");
         // or if the EDIF inside the DCP is encrypted because of source references,
         // you can alternatively supply a separate EDIF
         //Design design = Design.readCheckpoint("my_test/dcpfile/input/1_spi.dcp", "my_test/dcpfile/input/1_spi.edf");
@@ -247,20 +281,31 @@ public class MyPlacement {
 
         Collection<Net> nets = mp.design.getNets();
 
+//        designTracker dt0 = new designTracker(mp.siteInstsToBePlaced, mp.design.getNets());
+
         System.out.println("==============================================================================");
         System.out.println("==                 conducting initial random placement                      ==");
+        System.out.println("==============================================================================");
+        long startTime=System.currentTimeMillis();
         //make a random placement of the design
         mp.randomPlacement();
-        System.out.println("==============================================================================");
+        long endTime=System.currentTimeMillis();
+        System.out.println("\t*Total*\t"+(endTime-startTime)/1000.0 + "s");
+        System.out.println("------------------------------------------------------------------------------");
+
 
         System.out.println("==============================================================================");
         System.out.println("==                           conducting SA Placer                           ==");
-        //make a random placement of the design
-        mp.SAPlacer();
         System.out.println("==============================================================================");
+        long startTime1 = System.currentTimeMillis();
+        //make a SA placement of the design
+        mp.SAPlacer();
+        long endTime1 = System.currentTimeMillis();
+        System.out.println("\t*Total*\t"+(endTime1-startTime1)/1000.0 + "s");
+        System.out.println("------------------------------------------------------------------------------");
 
         // To write out a design
-        mp.design.writeCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/spmc/mjpeg_5cores/out_configuration_placed.dcp");
+        mp.design.writeCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/spmc/hello_world_vivado/out_configuration_placed.dcp");
 //        design.writeCheckpoint("my_test/dcpfile/output/1_spi.dcp");
     }
 
