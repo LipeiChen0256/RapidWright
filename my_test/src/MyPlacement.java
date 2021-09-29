@@ -104,10 +104,10 @@ public class MyPlacement {
                 exit = true;
         }
         System.out.println("Annealing completed!");
-//        design.clearUsedSites();
-//        for(Map.Entry<SiteInst, Site> e : bestConfiguration.entrySet()){
-//            e.getKey().place(e.getValue());
-//        }
+        design.clearUsedSites();
+        for(Map.Entry<SiteInst, Site> e : bestConfiguration.entrySet()){
+            e.getKey().place(e.getValue());
+        }
 
         System.out.println("SAPlacer completed.");
     }
@@ -245,7 +245,7 @@ public class MyPlacement {
         //find all unused Sites that can be populated with needed Type
 
         ArrayList<Site> siteList = new ArrayList<>();
-        Site[] sites = device.getAllCompatibleSites(type);
+        Site[] sites = MyPlacement.getAllCompatibleSitesFixed(device, type);
         for (Site s : sites) {
             if (!design.isSiteUsed(s)) {
                 siteList.add(s);
@@ -254,10 +254,22 @@ public class MyPlacement {
         return siteList;
     }
 
+    private static final Map<Device, Map<SiteTypeEnum, Site[]>> compatibleSitesCache = new HashMap<>();
+    public static Site[] getAllCompatibleSitesFixed(Device dev, SiteTypeEnum ste) {
+        return compatibleSitesCache.computeIfAbsent(dev, x -> new HashMap<>())
+                .computeIfAbsent(ste, s -> Arrays.stream(dev.getAllCompatibleSites(s))
+                        .filter(site -> {
+                            SiteTypeEnum[] compat = site.getAlternateSiteTypeEnums();
+                            return site.getSiteTypeEnum()==s || (compat != null && Arrays.asList(compat).contains(s));
+                        })
+                        .toArray(Site[]::new)
+                );
+    }
+
     public static void main(String[] args) {
 
 
-        Design design = Design.readCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/spmc/hello_world_vivado/configuration_placed.dcp");
+        Design design = Design.readCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/yosys/cam/cam_bram_top_placed.dcp");
         // or if the EDIF inside the DCP is encrypted because of source references,
         // you can alternatively supply a separate EDIF
         //Design design = Design.readCheckpoint("my_test/dcpfile/input/1_spi.dcp", "my_test/dcpfile/input/1_spi.edf");
@@ -305,7 +317,7 @@ public class MyPlacement {
         System.out.println("------------------------------------------------------------------------------");
 
         // To write out a design
-        mp.design.writeCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/spmc/hello_world_vivado/out_configuration_placed.dcp");
+        mp.design.writeCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/yosys/cam/out_cam_bram_top_placed.dcp");
 //        design.writeCheckpoint("my_test/dcpfile/output/1_spi.dcp");
     }
 
