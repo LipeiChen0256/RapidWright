@@ -11,10 +11,13 @@ import com.xilinx.rapidwright.tests.CodePerfTracker;
 import com.xilinx.rapidwright.util.FileTools;
 import com.xilinx.rapidwright.util.StringTools;
 import com.xilinx.rapidwright.util.Utils;
+import org.apache.commons.lang3.StringUtils;
 import org.python.modules._hashlib;
 
 import java.io.FileNotFoundException;
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class MyPlacement {
 
@@ -33,6 +36,8 @@ public class MyPlacement {
 
     SiteInst selectedSiteInst;
     Site selectedSite;
+    SiteInst selectedSiteInst2;
+    Site selectedSite2;
     public MyPlacement(Design design) {
         this.device = design.getDevice();
         this.design = design;
@@ -102,19 +107,39 @@ public class MyPlacement {
             double exitCriterion = 0.05 * (prevLength/current.getNets().size());
             if(temperature < exitCriterion)
                 exit = true;
-        }
+        }// outer loop
         System.out.println("Annealing completed!");
         design.clearUsedSites();
         for(Map.Entry<SiteInst, Site> e : bestConfiguration.entrySet()){
             e.getKey().place(e.getValue());
         }
 
+        System.out.println("start VIP special care for Carry Chain...");
+        siteInstVerticalStack();
+        System.out.println("special care ended!");
+
         System.out.println("SAPlacer completed.");
     }
+
+/*    private boolean applyRandSwap(designTracker current) {
+        int size = current.getSiteInstsPlaced().size();
+        selectedSiteInst = current.getSiteInstsPlaced().get(rand.nextInt(size));
+        selectedSite = selectedSiteInst.getSite();
+        do{
+            selectedSiteInst2 = current.getSiteInstsPlaced().get(rand.nextInt(size));
+        }while(selectedSiteInst2.equals(selectedSiteInst));
+        selectedSite2 = selectedSiteInst2.getSite();
+        selectedSiteInst2.place(selectedSite);
+        selectedSiteInst.place(selectedSite2);
+    }*/
 
     private void undoChange() {
         selectedSiteInst.place(selectedSite);
     }
+/*    private void undoSwap() {
+        selectedSite2.place(selectedSite2);
+        selectedSite2.p
+    }*/
 
     private double updateTemperature(double temperature, double alpha) {
         double gamma;
@@ -266,22 +291,110 @@ public class MyPlacement {
                 );
     }
 
+    private void siteInstVerticalStack(){
+        //find out carry chain
+        Net[] carrNets = design.getNets().stream()
+                .filter(net -> net.getLogicalNet()!=null)
+                .filter(net -> {
+                    ArrayList<EDIFPortInst> epis = new ArrayList<>(net.getLogicalNet().getPortInsts());
+                    String name1 = epis.get(0).getName();
+                    String name2 = epis.get(1).getName();
+                    return epis.size() == 2 && (name1.contains("CI") && name2.contains("CO") || name2.contains("CI") && name1.contains("CO"));
+                })
+                .sorted(Comparator.comparing(Net::getName))
+                .toArray(Net[]::new);
+
+        //sort these carry Chains
+        //find out all related SiteInst
+        ArrayList<Set<SiteInst>> siteInstList = new ArrayList<>();
+        for(int i=0; i< carrNets.length; i++) {
+            Net net = carrNets[i];
+            Set<SiteInst> tmpSet = new HashSet<>(net.getSiteInsts());
+            siteInstList.add(tmpSet);
+        }
+        
+        boolean isSorted = false;
+        while(!isSorted) {
+            isSorted = true;
+            for (int i = 0; i < siteInstList.size(); i++) {
+                Set set1 = siteInstList.get(i);
+                for (int j = 0; j < siteInstList.size(); j++) {
+                    if (i == j) continue;
+                    Set set2 = siteInstList.get(j);
+                    if (!Collections.disjoint(set1, set2)) {
+                        isSorted = false;
+                        Set set3 = getUnion(set1,set2);
+                        siteInstList.add(set3);
+                        siteInstList.remove(set1);
+                        siteInstList.remove(set2);
+                    }
+                }
+            }
+        }
+
+        //place
+        Set<SiteInst> modifiedSet = new HashSet<>();
+        for(Set set : siteInstList){
+            ArrayList<SiteInst> siList = new ArrayList<>(set);
+            for (int i=1; i<siList.size(); i++){
+                Site site = siList.get(i-1).getSite();
+                Site site1 = siList.get(i).getSite(); //siteInst that has carryChain
+//                int X = site.getInstanceX();
+//                int Y = site.getInstanceY();
+                int dy = 0;
+                int count = 0;
+                Site site2;
+                do {
+                    dy++;
+                    site2 = site.getNeighborSite(0, dy);//siteInst that above the site
+                }while(!site2.isCompatibleSiteType(site1));
+                SiteInst siteInst1 = siList.get(i);
+                SiteInst siteInst2 = design.getSiteInstFromSite(site2);
+                if(siteInst2==null){
+                    siteInst1.place(site2);
+                    modifiedSet.add(siteInst1);
+                }else{
+                    siteInst1.place(site2);
+                    modifiedSet.add(siteInst1);
+                    siteInst2.place(site1);
+                }
+            }
+            modifiedSet.add(siList.get(0));
+        }
+
+        //get the site to be used for swaping
+//        public Site getCorrespondingSite(SiteTypeEnum type, Tile newSiteTile);
+    }
+
+    private boolean isModified(Site site2, Set<SiteInst> modifiedSet) {
+        return modifiedSet.contains(design.getSiteInstFromSite(site2));
+    }
+
+    // get union
+    private Set<SiteInst> getUnion(Set<SiteInst> set1, Set<SiteInst> set2) {
+        Set<SiteInst> result = new HashSet<>();
+        result.addAll(set1);
+        result.removeAll(set2);
+        result.addAll(set2);
+        return result;
+    }
+
     public static void main(String[] args) {
 
 
-        Design design = Design.readCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/yosys/cam/cam_bram_top_placed.dcp");
+        Design design = Design.readCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/yosys/cordic/cordic_10_12_placed.dcp");
         // or if the EDIF inside the DCP is encrypted because of source references,
         // you can alternatively supply a separate EDIF
         //Design design = Design.readCheckpoint("my_test/dcpfile/input/1_spi.dcp", "my_test/dcpfile/input/1_spi.edf");
         /* fill all data structures by itself from the EDIF netlist*/
-        DesignTools.createMissingSitePinInsts(design);
-        design.unrouteDesign();
-        design.getSiteInsts().stream()
-                .filter(siteInst -> Utils.isModuleSiteType(siteInst.getSiteTypeEnum()))
-                .forEach(SiteInst::unPlace);
+
+//        DesignTools.createMissingSitePinInsts(design);
+//        design.unrouteDesign();
+//        design.getSiteInsts().stream()
+//                .filter(siteInst -> Utils.isModuleSiteType(siteInst.getSiteTypeEnum()))
+//                .forEach(SiteInst::unPlace);
 
         MyPlacement mp = new MyPlacement(design);
-
         //to find all Sites on this device
         HashMap<String, Site> allSitesOnDevice = new HashMap<>();
         for (Tile t : mp.device.getAllTiles()) {
@@ -292,8 +405,6 @@ public class MyPlacement {
         }
 
         Collection<Net> nets = mp.design.getNets();
-
-//        designTracker dt0 = new designTracker(mp.siteInstsToBePlaced, mp.design.getNets());
 
         System.out.println("==============================================================================");
         System.out.println("==                 conducting initial random placement                      ==");
@@ -317,7 +428,7 @@ public class MyPlacement {
         System.out.println("------------------------------------------------------------------------------");
 
         // To write out a design
-        mp.design.writeCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/yosys/cam/out_cam_bram_top_placed.dcp");
+        mp.design.writeCheckpoint("my_test/rapidwright_benchmarks_unrouted_v2/benchmarks/yosys/cordic/out_cordic_10_12_placed.dcp");
 //        design.writeCheckpoint("my_test/dcpfile/output/1_spi.dcp");
     }
 
