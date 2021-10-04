@@ -28,7 +28,7 @@ public class MyPlacement {
     ArrayList<SiteInst> siteInstsToBePlaced;
 
     //the range of InnerNum is [1, 10]
-    private int innerNum = 1;
+    private int innerNum = 10;
     private double rangeLimit;
     private Random rand = new Random();
     boolean calInitialTemp = false;
@@ -70,7 +70,6 @@ public class MyPlacement {
             int numRefusedChange = 0;
             int badAcceptedMoveCount = 0;
             double totalMovesCost = 0.0;
-
             for(int i=0; i<movesPerTemp; i++){
 
                 if(applyRandChange(current)) {
@@ -78,6 +77,7 @@ public class MyPlacement {
                     double currLength = current.calSysCost();
                     if (Math.random() < Probability(prevLength, currLength, temperature)) {
                         numAcceptedChange++;
+
                         prevLength = currLength;
                     } else {
                         numRefusedChange++;
@@ -113,11 +113,7 @@ public class MyPlacement {
         for(Map.Entry<SiteInst, Site> e : bestConfiguration.entrySet()){
             e.getKey().place(e.getValue());
         }
-
-        System.out.println("start VIP special care for Carry Chain...");
         siteInstVerticalStack();
-        System.out.println("special care ended!");
-
         System.out.println("SAPlacer completed.");
     }
 
@@ -362,6 +358,49 @@ public class MyPlacement {
             modifiedSet.add(siList.get(0));
         }
 
+//        for(Set set : siteInstList){
+//            ArrayList<SiteInst> siList = new ArrayList<>(set);
+//
+//            ArrayList<Site> sitesTobeUsed = new ArrayList<>();
+//            Site site = siList.get(0).getSite();
+//            boolean siteAboveEnough = true;
+//            int dy = 1;
+//            Site site2;
+//            for(; dy<siList.size(); dy++){
+//                int deltaY = dy;
+//                site2 = site.getNeighborSite(0, deltaY);//siteInst that above the site
+//                //check if above genug
+//                if(isModified(site2, modifiedSet)||!site2.isCompatibleSiteType(siList.get(dy).getSite())){
+//                    siteAboveEnough = false;
+//                }
+//                if(!siteAboveEnough){
+//                    deltaY = dy - siList.size();
+//                    site2 = site.getNeighborSite(0, dy);//siteInst that above the site
+//                }
+//                sitesTobeUsed.add(site2);
+//            }
+//
+//
+//            for (int i=1; i<siList.size(); i++){
+//                Site site1 = siList.get(i).getSite(); //siteInst that has carryChain
+////                int X = site.getInstanceX();
+////                int Y = site.getInstanceY();
+//
+//                site2 = sitesTobeUsed.get(i-1);
+//                SiteInst siteInst1 = siList.get(i);
+//                SiteInst siteInst2 = design.getSiteInstFromSite(site2);
+//                if(siteInst2==null){
+//                    siteInst1.place(site2);
+//                    modifiedSet.add(siteInst1);
+//                }else{
+//                    siteInst1.place(site2);
+//                    modifiedSet.add(siteInst1);
+//                    siteInst2.place(site1);
+//                }
+//            }
+//            modifiedSet.add(siList.get(0));
+//        }
+
         //get the site to be used for swaping
 //        public Site getCorrespondingSite(SiteTypeEnum type, Tile newSiteTile);
     }
@@ -388,11 +427,11 @@ public class MyPlacement {
         //Design design = Design.readCheckpoint("my_test/dcpfile/input/1_spi.dcp", "my_test/dcpfile/input/1_spi.edf");
         /* fill all data structures by itself from the EDIF netlist*/
 
-//        DesignTools.createMissingSitePinInsts(design);
-//        design.unrouteDesign();
-//        design.getSiteInsts().stream()
-//                .filter(siteInst -> Utils.isModuleSiteType(siteInst.getSiteTypeEnum()))
-//                .forEach(SiteInst::unPlace);
+        DesignTools.createMissingSitePinInsts(design);
+        design.unrouteDesign();
+        design.getSiteInsts().stream()
+                .filter(siteInst -> Utils.isModuleSiteType(siteInst.getSiteTypeEnum()) && siteInst.getSiteTypeEnum()!=SiteTypeEnum.BUFGCE)
+                .forEach(SiteInst::unPlace);
 
         MyPlacement mp = new MyPlacement(design);
         //to find all Sites on this device
