@@ -1,23 +1,8 @@
 import com.xilinx.rapidwright.design.*;
-import com.xilinx.rapidwright.design.Module;
 import com.xilinx.rapidwright.device.*;
 import com.xilinx.rapidwright.edif.*;
-import com.xilinx.rapidwright.interchange.DeviceResources;
-import com.xilinx.rapidwright.interchange.SiteSitePIP;
-import com.xilinx.rapidwright.ipi.BlockCreator;
-import com.xilinx.rapidwright.placer.blockplacer.*;
-import com.xilinx.rapidwright.router.Router;
-import com.xilinx.rapidwright.tests.CodePerfTracker;
-import com.xilinx.rapidwright.util.FileTools;
-import com.xilinx.rapidwright.util.StringTools;
 import com.xilinx.rapidwright.util.Utils;
-import org.apache.commons.lang3.StringUtils;
-import org.python.modules._hashlib;
-
-import java.io.FileNotFoundException;
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.stream.Stream;
 
 public class MyPlacement {
 
@@ -28,7 +13,7 @@ public class MyPlacement {
     ArrayList<SiteInst> siteInstsToBePlaced;
 
     //the range of InnerNum is [1, 10]
-    private int innerNum = 10;
+    private int innerNum = 1;
     private double rangeLimit;
     private Random rand = new Random();
     boolean calInitialTemp = false;
@@ -36,12 +21,13 @@ public class MyPlacement {
 
     SiteInst selectedSiteInst;
     Site selectedSite;
-    SiteInst selectedSiteInst2;
-    Site selectedSite2;
     public MyPlacement(Design design) {
         this.device = design.getDevice();
         this.design = design;
-        this.siteInstsToBePlaced = new ArrayList<>(design.getSiteInsts());
+        SiteInst[] siteInsts = design.getSiteInsts().stream()
+                .filter(siteInst -> Utils.isModuleSiteType(siteInst.getSiteTypeEnum()) && siteInst.getSiteTypeEnum()!=SiteTypeEnum.BUFGCE)
+                .toArray(SiteInst[]::new);
+        this.siteInstsToBePlaced = new ArrayList<>(Arrays.asList(siteInsts));
     }
 
     private static double Probability(double f1, double f2, double temp) {
@@ -59,7 +45,8 @@ public class MyPlacement {
 
         System.out.println("start annealing ...");
         rangeLimit = Math.max(device.getColumns(), device.getRows());
-        designTracker current= new designTracker(design.getSiteInsts(), design.getNets());
+        designTracker current= new designTracker(siteInstsToBePlaced, design.getNets());
+        double currLength = 0.0;
         double prevLength = current.calSysCost();
         double bestLength = prevLength;
 //        designTracker best = current.duplicate();
@@ -74,7 +61,7 @@ public class MyPlacement {
 
                 if(applyRandChange(current)) {
                     numChange++;
-                    double currLength = current.calSysCost();
+                    currLength = current.calSysCost();
                     if (Math.random() < Probability(prevLength, currLength, temperature)) {
                         numAcceptedChange++;
 
@@ -85,7 +72,7 @@ public class MyPlacement {
                     }
                     if (currLength < bestLength) {
                         bestLength = currLength;
-                        bestConfiguration = current.generateConfig();
+//                        bestConfiguration = current.generateConfig();
                     }
                 }
             }//inner loop
@@ -104,38 +91,24 @@ public class MyPlacement {
             temperature = updateTemperature(temperature, alpha);
             System.out.printf("temperature: %f, range limit: %f, best system cost: %f%n", temperature,rangeLimit,bestLength);
             //TODO: the exit condition of the outer loop
-            double exitCriterion = 0.05 * (prevLength/current.getNets().size());
+            double exitCriterion = 0.005 * (prevLength/current.getNets().size());
+//            double exitCriterion = (prevLength - currLength)/prevLength;
             if(temperature < exitCriterion)
                 exit = true;
         }// outer loop
         System.out.println("Annealing completed!");
-        design.clearUsedSites();
-        for(Map.Entry<SiteInst, Site> e : bestConfiguration.entrySet()){
-            e.getKey().place(e.getValue());
-        }
+//        design.clearUsedSites();
+//        for(Map.Entry<SiteInst, Site> e : bestConfiguration.entrySet()){
+//            e.getKey().place(e.getValue());
+//        }
         siteInstVerticalStack();
         System.out.println("SAPlacer completed.");
     }
 
-/*    private boolean applyRandSwap(designTracker current) {
-        int size = current.getSiteInstsPlaced().size();
-        selectedSiteInst = current.getSiteInstsPlaced().get(rand.nextInt(size));
-        selectedSite = selectedSiteInst.getSite();
-        do{
-            selectedSiteInst2 = current.getSiteInstsPlaced().get(rand.nextInt(size));
-        }while(selectedSiteInst2.equals(selectedSiteInst));
-        selectedSite2 = selectedSiteInst2.getSite();
-        selectedSiteInst2.place(selectedSite);
-        selectedSiteInst.place(selectedSite2);
-    }*/
 
     private void undoChange() {
         selectedSiteInst.place(selectedSite);
     }
-/*    private void undoSwap() {
-        selectedSite2.place(selectedSite2);
-        selectedSite2.p
-    }*/
 
     private double updateTemperature(double temperature, double alpha) {
         double gamma;
@@ -154,7 +127,7 @@ public class MyPlacement {
         double curCost = 0.0;
         double tmp = 0.0;
         int numAcceptedChange = 0;
-        designTracker current = new designTracker(design.getSiteInsts(), design.getNets());
+        designTracker current = new designTracker(siteInstsToBePlaced, design.getNets());
         ArrayList<Double> arrayCosts = new ArrayList<>();
         for(int i=0; i<numSiteInst; i++){
             //TODO: is the random Change the same as generateNew
@@ -313,13 +286,13 @@ public class MyPlacement {
         while(!isSorted) {
             isSorted = true;
             for (int i = 0; i < siteInstList.size(); i++) {
-                Set set1 = siteInstList.get(i);
+                Set<SiteInst> set1 = siteInstList.get(i);
                 for (int j = 0; j < siteInstList.size(); j++) {
                     if (i == j) continue;
-                    Set set2 = siteInstList.get(j);
+                    Set<SiteInst> set2 = siteInstList.get(j);
                     if (!Collections.disjoint(set1, set2)) {
                         isSorted = false;
-                        Set set3 = getUnion(set1,set2);
+                        Set<SiteInst> set3 = getUnion(set1,set2);
                         siteInstList.add(set3);
                         siteInstList.remove(set1);
                         siteInstList.remove(set2);
@@ -358,49 +331,6 @@ public class MyPlacement {
             modifiedSet.add(siList.get(0));
         }
 
-//        for(Set set : siteInstList){
-//            ArrayList<SiteInst> siList = new ArrayList<>(set);
-//
-//            ArrayList<Site> sitesTobeUsed = new ArrayList<>();
-//            Site site = siList.get(0).getSite();
-//            boolean siteAboveEnough = true;
-//            int dy = 1;
-//            Site site2;
-//            for(; dy<siList.size(); dy++){
-//                int deltaY = dy;
-//                site2 = site.getNeighborSite(0, deltaY);//siteInst that above the site
-//                //check if above genug
-//                if(isModified(site2, modifiedSet)||!site2.isCompatibleSiteType(siList.get(dy).getSite())){
-//                    siteAboveEnough = false;
-//                }
-//                if(!siteAboveEnough){
-//                    deltaY = dy - siList.size();
-//                    site2 = site.getNeighborSite(0, dy);//siteInst that above the site
-//                }
-//                sitesTobeUsed.add(site2);
-//            }
-//
-//
-//            for (int i=1; i<siList.size(); i++){
-//                Site site1 = siList.get(i).getSite(); //siteInst that has carryChain
-////                int X = site.getInstanceX();
-////                int Y = site.getInstanceY();
-//
-//                site2 = sitesTobeUsed.get(i-1);
-//                SiteInst siteInst1 = siList.get(i);
-//                SiteInst siteInst2 = design.getSiteInstFromSite(site2);
-//                if(siteInst2==null){
-//                    siteInst1.place(site2);
-//                    modifiedSet.add(siteInst1);
-//                }else{
-//                    siteInst1.place(site2);
-//                    modifiedSet.add(siteInst1);
-//                    siteInst2.place(site1);
-//                }
-//            }
-//            modifiedSet.add(siList.get(0));
-//        }
-
         //get the site to be used for swaping
 //        public Site getCorrespondingSite(SiteTypeEnum type, Tile newSiteTile);
     }
@@ -432,6 +362,10 @@ public class MyPlacement {
         design.getSiteInsts().stream()
                 .filter(siteInst -> Utils.isModuleSiteType(siteInst.getSiteTypeEnum()) && siteInst.getSiteTypeEnum()!=SiteTypeEnum.BUFGCE)
                 .forEach(SiteInst::unPlace);
+//        design.getSiteInsts().stream()
+//                .filter(siteInst -> Utils.isModuleSiteType(siteInst.getSiteTypeEnum()))
+//                .forEach(SiteInst::unPlace);
+
 
         MyPlacement mp = new MyPlacement(design);
         //to find all Sites on this device

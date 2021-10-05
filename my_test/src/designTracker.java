@@ -1,9 +1,6 @@
 import com.xilinx.rapidwright.design.Net;
 import com.xilinx.rapidwright.design.SiteInst;
 import com.xilinx.rapidwright.device.Site;
-import com.xilinx.rapidwright.placer.blockplacer.Path;
-
-import java.text.CollationElementIterator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,8 +32,8 @@ public class designTracker {
         return Nets;
     }
 
-    public designTracker(Collection<SiteInst> siteInstsPlaced, Collection<Net> nets) {
-        this.siteInstsPlaced = new ArrayList<>(siteInstsPlaced);
+    public designTracker(ArrayList siteInstsPlaced, Collection<Net> nets) {
+        this.siteInstsPlaced = siteInstsPlaced;
         this.Nets = new ArrayList<>(nets);
     }
 
